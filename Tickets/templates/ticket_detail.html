@@ -22,7 +22,7 @@
                 {% if ticket_data.type %}
                     <p class="card-text">Type : {{ ticket_data.type }}</p>
                 {% else %}
-                    <p class="card-text">Due at : 'Information Not Available'</p>
+                    <p class="card-text">Type : 'Information Not Available'</p>
                 {% endif %}
                 <p class="card-text">Description : {{ ticket_data.description }}</p>
 
@@ -46,7 +46,7 @@
                 {% endif %}
 
 
-                <p class="card-text">Tags   : {{ ticket_data.tags }}</p>
+                <p class="card-text">Tags : {{ ticket_data.tags }}</p>
 
           </div>
         </div>
