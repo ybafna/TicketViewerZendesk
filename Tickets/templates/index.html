@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body>
+<div style="text-align: center">
+    <h3 class="display-3">Your Tickets</h3>
+</div>
+
+{% if tickets and not tickets.error %}
+<div class="container">
+    <div class="row">
+        {% if tickets.has_other_pages %}
+          <ul class="pagination justify-content-center">
+            {% if tickets.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ tickets.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+            {% endif %}
+            {% for i in tickets.paginator.page_range %}
+              {% if tickets.number == i %}
+                <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if tickets.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ tickets.next_page_number }}">&raquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">&raquo;</a></li>
+            {% endif %}
+          </ul>
+        {% endif %}
+    </div>
+    <div class="col-sm-10 offset-1">
+        <table class="table">
+          <thead>
+            <tr>
+                <th scope="col">Ticket Id</th>
+                <th scope="col">Description</th>
+                <th scope="col">Status</th>
+                <th scope="col">Last Updated At</th>
+                <th scope="col">Details</th>
+            </tr>
+          </thead>
+          <tbody style="font-size: 14px">
+           {% for ticket in tickets %}
+              <tr>
+                  <td>{{ ticket.id }}</td>
+                <td>{{ ticket.description }}</td>
+                  {% if ticket.status %}
+                      <td>{{ ticket.status }}</td>
+                  {% else %}
+                      <td>Not Available</td>
+                  {% endif %}
+                  {% if ticket.updated_at %}
+                      <td>{{ ticket.updated_at }}</td>
+                  {% else %}
+                      <td>Not Available</td>
+                  {% endif %}
+                <td><a class="link-success" href="{% url 'get_ticket' ticket.id%}">Details</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+    <div class="row">
+        {% if tickets.has_other_pages %}
+          <ul class="pagination justify-content-center">
+            {% if tickets.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ tickets.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+            {% endif %}
+            {% for i in tickets.paginator.page_range %}
+              {% if tickets.number == i %}
+                <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if tickets.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ tickets.next_page_number }}">&raquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">&raquo;</a></li>
+            {% endif %}
+          </ul>
+        {% endif %}
+        </div>
+{% else %}
+    <div style="text-align: center"><h3>No tickets to show at this moment.</h3></div>
+{% endif %}
+</div>
+</body>
+</html>
