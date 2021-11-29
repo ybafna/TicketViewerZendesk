@@ -59,7 +59,7 @@ def get_individual_ticket(request, ticket_id):
                 Ticket.objects.get(id=ticket_id).delete()
             parse_ticket_object(response.json())
             ticket_data = Ticket.objects.get(id=ticket_id)
-        elif response.status_code == 503:
+        else:
             ticket_data = create_error_response()
         return render(request=request, template_name='ticket_detail.html',
                       context={'ticket_data': ticket_data, 'ticket_id': ticket_id})
