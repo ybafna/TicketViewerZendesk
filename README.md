@@ -6,9 +6,10 @@ Setup:<br>
 
 1)Clone the repo<br>
 2)Install Python 3.8 and pip<br>
-3)Run this command from root 'ZendeskCC' folder: pip install -r requirements.txt<br>
-4)Run command - python manage.py makemigrations<br>
-5)Run command - python manage.py migrate<br>
+3)Run the following commands in sequence from root 'ZendeskCC' folder: <br>
+pip install -r requirements.txt<br>
+python manage.py makemigrations<br>
+python manage.py migrate<br>
 
 
 Modify values in dev.ini file as below:<br>
@@ -19,5 +20,4 @@ email_id={your_email_id}<br>
 
 Finally, run the command - python manage.py runserver<br>
 
-This will load the webapp on localhost:8000/tickets/<br>
-
+Now you may hit the url http://localhost:8000/tickets/ to view all the tickets.<br>
