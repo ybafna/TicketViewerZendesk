@@ -11,6 +11,10 @@
         <h3 class="display-3">The page you are looking for does not exists!</h3>
     {% elif error_code == 500 %}
         <h3 class="display-3">Something went wrong...</h3>
+    {% elif error_code == 401 %}
+        <h3 class="display-3">Please verify the credentials!</h3>
+    {% else %}
+        <h3 class="display-3">Please try again later!</h3>
     {% endif %}
 </div>
 </body>

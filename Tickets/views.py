@@ -11,10 +11,6 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from Tickets.models import Ticket
 
 
-def handler404(request):
-    return render(request=request, template_name='error.html', context={'error_code': 404}, status=404)
-
-
 # View that handle request for fetching all the tickets for a user
 def get_tickets(request):
     """ If data is already present in the DB, use it, else make an API call to fetch all the tickets.
@@ -26,19 +22,23 @@ def get_tickets(request):
     """
     try:
         if not Ticket.objects.all():
-            get_all_tickets(request)
-        tickets_all = Ticket.objects.all()
-        page = request.GET.get('page', 1)
+            tickets_all = get_all_tickets(request)
+        # tickets_all = Ticket.objects.all()
+        if 'error' not in tickets_all:
+            page = request.GET.get('page', 1)
 
-        # Divides response into pages with 25 elements in each page
-        paginated_tickets = Paginator(tickets_all, 25)
-        try:
-            tickets = paginated_tickets.page(page)
-        except PageNotAnInteger:
-            tickets = paginated_tickets.page(1)
-        except EmptyPage:
-            tickets = paginated_tickets.page(paginated_tickets.num_pages)
-        return render(request=request, template_name='index.html', context={'tickets': tickets}, status=200)
+            # Divides response into pages with 25 elements in each page
+            paginated_tickets = Paginator(tickets_all, 25)
+            try:
+                tickets = paginated_tickets.page(page)
+            except PageNotAnInteger:
+                tickets = paginated_tickets.page(1)
+            except EmptyPage:
+                tickets = paginated_tickets.page(paginated_tickets.num_pages)
+            return render(request=request, template_name='index.html', context={'tickets': tickets}, status=200)
+        else:
+            return render(request=request, template_name='error.html',
+                          context={'tickets': tickets_all, 'error_code':tickets_all['error_code']}, status=200)
     except Exception:
         logging.info("Error :: Get Tickets")
         return render(request=request, template_name='error.html', context={'error_code': 500}, status=500)
@@ -58,8 +58,13 @@ def get_individual_ticket(request, ticket_id):
                           context={'ticket_data': ticket_data, 'ticket_id': ticket_id}, status=200)
         else:
             ticket_data = get_ticket(ticket_id)
-            return render(request=request, template_name='ticket_detail.html',
-                          context={'ticket_data': ticket_data, 'ticket_id': ticket_id}, status=200)
+            if 'error' not in ticket_data:
+                return render(request=request, template_name='ticket_detail.html',
+                              context={'ticket_data': ticket_data, 'ticket_id': ticket_id}, status=200)
+            else:
+                return render(request=request, template_name='error.html',
+                              context={'ticket_data': ticket_data, 'ticket_id': ticket_id,
+                                       'error_code': ticket_data['error_code']}, status=200)
     except Exception:
         logging.info("Error :: Get Individual Ticket")
         return render(request=request, template_name='error.html', context={'error_code': 500}, status=500)
@@ -71,7 +76,6 @@ def get_ticket(ticket_id):
     base_api_url = config['DEFAULT']['tickets_api_url']
     individual_ticket_url_path = config['DEFAULT']['individual_ticket_url_path']
     response = requests.get(base_api_url + individual_ticket_url_path + "/" + ticket_id, headers=headers)
-
     # If API response is successful and does not contain any error, save the ticket to DB and return
     if response.status_code == 200 and 'ticket' in response.json():
         if Ticket.objects.filter(id=ticket_id).exists():
@@ -80,14 +84,16 @@ def get_ticket(ticket_id):
         ticket_data = Ticket.objects.get(id=ticket_id)
     else:
         # Can be broken further into different HTTP codes as per the requirement
-        ticket_data = create_error_response()
+        ticket_data = create_error_response(response.status_code)
 
     return ticket_data
 
 
-def create_error_response():
+def create_error_response(error_code):
     response = {
-        'error': 'API Failure'
+        'error': 'API Failure',
+        'error_code': error_code
+
     }
     return response
 
@@ -108,13 +114,8 @@ def get_all_tickets(request):
             for ticket in json_response['tickets']:
                 parse_ticket_object(ticket)
     else:
-        """ Error Handling in case of API failures.
-            We do nothing, simply because, we are not updating the DB. 
-            If the DB was empty, it would still be empty. Otherwise, nothing would change. 
-            Empty responses are handled by UI.
-        """
-        pass
-    return None
+        return create_error_response(response.status_code)
+    return Ticket.objects.all()
 
 
 # Creates headers for API call
