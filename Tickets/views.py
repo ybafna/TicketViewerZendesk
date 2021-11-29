@@ -23,7 +23,8 @@ def get_tickets(request):
     try:
         if not Ticket.objects.all():
             tickets_all = get_all_tickets(request)
-        # tickets_all = Ticket.objects.all()
+        else:
+            tickets_all = Ticket.objects.all()
         if 'error' not in tickets_all:
             page = request.GET.get('page', 1)
 
