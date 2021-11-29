@@ -54,10 +54,10 @@ def get_individual_ticket(request, ticket_id):
         response = requests.get(base_api_url + individual_ticket_url_path + "/" + ticket_id, headers=headers)
 
         # If API response is successful and does not contain any error, save the ticket to DB and return
-        if response.status_code == 200 and not response['error']:
+        if response.status_code == 200 and not response.json()['ticket']:
             if Ticket.objects.filter(id=ticket_id).exists():
                 Ticket.objects.get(id=ticket_id).delete()
-            parse_ticket_object(response.json())
+            parse_ticket_object(response.json()['ticket'])
             ticket_data = Ticket.objects.get(id=ticket_id)
         else:
             ticket_data = create_error_response()
@@ -83,7 +83,7 @@ def get_all_tickets(request):
     # Check if API response
     if response.status_code == 200:
         json_response = response.json()
-        if not json_response['error']:
+        if json_response['tickets']:
             """ Deletes previous ticket details for a user to store latest information in DB."""
             for ticket in Ticket.objects.all():
                 Ticket.objects.get(id=ticket.id).delete()
