@@ -80,17 +80,24 @@ def get_all_tickets(request):
     base_api_url = config['DEFAULT']['tickets_api_url']
     all_tickets_url_path = config['DEFAULT']['all_tickets_url_path']
     response = requests.get(base_api_url + all_tickets_url_path, headers=headers)
-
     # Check if API response
-    if response.status_code == 200 and response.json()['error']:
-        # Deletes previous ticket details for a user to store latest information in DB
-        for ticket in Ticket.objects.all():
-            Ticket.objects.get(id=ticket.id).delete()
+    if response.status_code == 200:
+        json_response = response.json()
+        if not json_response['error']:
+            """ Deletes previous ticket details for a user to store latest information in DB."""
+            for ticket in Ticket.objects.all():
+                Ticket.objects.get(id=ticket.id).delete()
 
-        # Parses the response object and saves in DB
-        for ticket in response.json()['tickets']:
-            parse_ticket_object(ticket)
-
+            # Parses the response object and saves in DB
+            for ticket in json_response['tickets']:
+                parse_ticket_object(ticket)
+    else:
+        """ Error Handling in case of API failures.
+            We do nothing, simply because, we are not updating the DB. 
+            If the DB was empty, it would still be empty. Otherwise, nothing would change. 
+            Empty responses are handled by UI.
+        """
+        pass
     return None
 
 
